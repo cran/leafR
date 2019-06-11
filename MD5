@@ -1,0 +1,14 @@
+3d01a9fd296768ceda8de7dcf304724b *DESCRIPTION
+704f07c9a9a3a0a65bfc014a81c87d23 *NAMESPACE
+04262a13773344364878a381e8f66d32 *NEWS
+1b20f2aa43fe6ee501c6f0daf5ff282a *R/data.R
+79d67d21d24df2ad91e53ec071e3c846 *R/main.R
+3ad5f0f8426cc19a73597860c27d3036 *README.md
+0a59b96b874f3ba29c433c831853a81a *inst/extdata/lidar_example.laz
+0b86bca85866b8ece1f5d0378e82ae78 *man/LAHV.Rd
+4b2e7118e0d95230317e20c59ccc7c72 *man/k.coefficient.Rd
+15eeaee7e7781f3a8824a667c4374774 *man/lad.profile.Rd
+e55c2351deed777a0dfa8bee600a6755 *man/lad.voxels.Rd
+a12e2af4bbd98112985d7cd52e6e6eba *man/lai.Rd
+3adc18be314d5bcc4999170d5366f027 *man/lai.raster.Rd
+e2b111a04e12ceb92b061c944b0d9a3e *man/lidar_example.laz.Rd

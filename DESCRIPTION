@@ -1,7 +1,7 @@
 Package: leafR
 Type: Package
 Title: Calculates the Leaf Area Index (LAD) and Other Related Functions
-Version: 0.3
+Version: 0.3.5
 Authors@R: c(
   person(given="Danilo Roberti Alves de", family="Almeida", email="daniloflorestas@gmail.com", role=c("aut", "cre"), comment=c(ORCID="https://orcid.org/0000-0002-8747-0085")),
   person(given="Scott Christopher", family="Stark", email="scottcstark@gmail.com", role=c("aut"), comment=c(ORCID="https://orcid.org/0000-0002-1579-1648")),
@@ -15,15 +15,13 @@ Description: A set of functions for analyzing the structure
   and Ranging) data. The methodology is discussed and described in 
   Almeida et al. (2019) <doi:10.3390/rs11010092> and 
   Stark et al. (2012) <doi:10.1111/j.1461-0248.2012.01864.x>.
-Imports: lidR, sp, data.table, raster, stats, lazyeval
+Imports: lidR, sp, data.table, raster, stats
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
-RoxygenNote: 6.1.1
-URL: https://github.com/DRAAlmeida/leafR
+RoxygenNote: 7.1.1
+URL: https://github.com/DRAAlmeida/leafR,
+        https://leafr.r-forge.r-project.org
 BugReports: https://github.com/DRAAlmeida/leafR/issues
-NeedsCompilation: no
-Packaged: 2019-08-01 23:30:17 UTC; caioh
 Author: Danilo Roberti Alves de Almeida [aut, cre]
     (<https://orcid.org/0000-0002-8747-0085>),
   Scott Christopher Stark [aut] (<https://orcid.org/0000-0002-1579-1648>),
@@ -32,4 +30,9 @@ Author: Danilo Roberti Alves de Almeida [aut, cre]
   Ruben Valbuena [aut] (<https://orcid.org/0000-0003-0493-7581>)
 Maintainer: Danilo Roberti Alves de Almeida <daniloflorestas@gmail.com>
 Repository: CRAN
-Date/Publication: 2019-08-02 11:10:05 UTC
+Repository/R-Forge/Project: leafr
+Repository/R-Forge/Revision: 9
+Repository/R-Forge/DateTimeStamp: 2021-07-02 01:39:40
+Date/Publication: 2021-07-04 18:30:02 UTC
+NeedsCompilation: no
+Packaged: 2021-07-02 01:54:06 UTC; rforge

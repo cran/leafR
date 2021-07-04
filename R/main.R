@@ -3,6 +3,10 @@
 #' @param Z numeric vector. The heights vector.
 #' @param maxZ numeric. The maximum height expected in the whole dataset.
 #'
+#' @return A [`list`][base::list] of point counts in each Z slice of 1 meter
+#'
+#' @importFrom data.table data.table
+#' @importFrom stats aggregate
 #' @export
 pointsByZSlice = function(Z, maxZ){
   heightSlices = as.integer(Z) # Round down
@@ -42,6 +46,8 @@ pointsByZSlice = function(Z, maxZ){
 #' @param grain.size horizontal resolution (suggested 1 meter for lad profiles and 10 meters for LAI maps)
 #' @param k coefficient to transform effective LAI to real LAI (k = 1; for effective LAI)
 #'
+#' @return A [`data.frame`][base::data.frame] of the 3D voxels information (xyz) with Leaf Area Density values
+#'
 #' @note The values of LAD are not estimated below 1 meter. For the following reasons:
 #' ground points influence
 #' realtive low sampling
@@ -53,6 +59,9 @@ pointsByZSlice = function(Z, maxZ){
 #' VOXELS_LAD = lad.voxels(normlas.file,
 #'                         grain.size = 2, k=1)
 #'
+#' @importFrom raster values
+#' @importFrom lidR grid_metrics readLAS
+#' @importFrom sp coordinates
 #' @importFrom stats formula
 #' @export
 lad.voxels = function(normlas.file, grain.size = 1, k = 1){
@@ -107,7 +116,7 @@ lad.voxels = function(normlas.file, grain.size = 1, k = 1){
 
   ### total matriz and cumsum.matrix:
   total.pulses.matrix.dz1 = matrix(apply(pulses.profile.dz1, 1, sum), ncol = length(pulses.profile.dz1), nrow = nrow(pulses.profile.dz1))
-  cumsum.matrix.dz1 = matrix(apply(pulses.profile.dz1, 1, cumsum), ncol = length(pulses.profile.dz1), nrow = nrow(pulses.profile.dz1), byrow = T)
+  cumsum.matrix.dz1 = matrix(apply(pulses.profile.dz1, 1, cumsum), ncol = length(pulses.profile.dz1), nrow = nrow(pulses.profile.dz1), byrow = TRUE)
 
   rm(pulses.profile.dz1)
 
@@ -168,6 +177,8 @@ lad.voxels = function(normlas.file, grain.size = 1, k = 1){
 #' @param VOXELS_LAD 3D grid of LAD values (output of lad.voxels() function)
 #' @param relative produce lad profile by relative total LAI values. Indicate when usinh effective LAI
 #'
+#' @return A [`data.frame`][base::data.frame] with the calculated Leaf Area Density
+#'
 #' @examples
 #' # Get the example laz file
 #' normlas.file = system.file("extdata", "lidar_example.laz", package="leafR")
@@ -187,9 +198,9 @@ lad.voxels = function(normlas.file, grain.size = 1, k = 1){
 #'      ylab = "Canopy height (m)", xlab = "LAD (% of LAI)")
 #'
 #' @export
-lad.profile = function(VOXELS_LAD, relative = F){
+lad.profile = function(VOXELS_LAD, relative = FALSE){
 
-  if(relative == T){
+  if(relative == TRUE){
     t.lad.profile = apply(VOXELS_LAD$LAD, 2, mean, na.rm = TRUE)
     t.lad.profile = t.lad.profile/sum(t.lad.profile)*100
   }else{
@@ -223,6 +234,8 @@ lad.profile = function(VOXELS_LAD, relative = F){
 #' @param min mix canopy height
 #' @param max max canopy height
 #'
+#' @return A [`numeric`][base::numeric] containing the LAI calculated from the Leaf Area Density
+#'
 #' @note The use of min and max arguments allowed the estimation of the LAI for different vertical strata
 #'
 #' @examples
@@ -247,7 +260,7 @@ lad.profile = function(VOXELS_LAD, relative = F){
 #'
 #' @export
 lai = function(lad_profile, min = 1, max = 100){
-  lai = sum(lad_profile$lad[(min):(max)], na.rm = T)
+  lai = sum(lad_profile$lad[(min):(max)], na.rm = TRUE)
   return(lai)
 }
 
@@ -268,8 +281,10 @@ lai = function(lad_profile, min = 1, max = 100){
 #' @param LAI.weighting boolean, define if LAVH should be weighted by total LAI. default FALSE
 #' @param height.weighting boolean, define if LAVH should be weighted by the max height. default FALSE
 #'
+#' @return A [`numeric`][base::numeric] containing the Leaf Area Heght Volume calculated from the Leaf Area Density profile.
+#'
 #' @references
-#' Almeida, D. R. A., Stark, S. C., Chazdon, R., Nelson, B. W., Cesar, R. G., Meli, P., … Brancalion, P. H. S. (2019). The effectiveness of lidar remote sensing for monitoring forest cover attributes and landscape restoration. Forest Ecology and Management, 438, 34–43. <https://doi.org/10.1016/J.FORECO.2019.02.002>
+#' Almeida, D. R. A., Stark, S. C., Chazdon, R., Nelson, B. W., Cesar, R. G., Meli, P., … Brancalion, P. H. S. (2019). The effectiveness of lidar remote sensing for monitoring forest cover attributes and landscape restoration. Forest Ecology and Management, 438, 34–43. \doi{10.1016/J.FORECO.2019.02.002}
 #'
 #' @examples
 #' # Get the example laz file
@@ -320,11 +335,14 @@ LAHV = function(lad_profile, LAI.weighting = FALSE, height.weighting = FALSE){
 #' the alternative TRUE was recommended by Valbuena et al. (2012), and it calculates Shannon evenness dividing it by the natural logarithm of the number of number of voxels with LAD values above the threshold.
 #' @param LAD.threshold numerical (0,1), defines the minimum value of LAD for considering the relative leaf abundance of a voxel in FHD calculation. Defaults to the inverse of the total number of voxels.
 #'
+#' @return A [`numeric`][base::numeric] containing the Foliage Height Diversity calculated from the Leaf Area Density profile
 #'
 #' @references
-#' Hill M. O. (1973) Diversity and evenness: a unifying notation and its consequences. Ecology. 54: 427–432. https://doi.org/10.2307%2F1934352
-#' MacArthur R.H., MacArthur J.W. (1961). On bird species diversity. Ecology 42: 594–598. http://dx.doi.org/10.2307/1932254
-#' Valbuena R., Packalen P., Martín-Fernández S., Maltamo M. (2012) Diversity and equitability ordering profiles applied to the study of forest structure. Forest Ecology and Management 276: 185–195. http://dx.doi.org/10.1016/j.foreco.2012.03.036
+#' Hill M. O. (1973) Diversity and evenness: a unifying notation and its consequences. Ecology. 54: 427–432. \doi{10.2307/1934352}
+#'
+#' MacArthur R.H., MacArthur J.W. (1961). On bird species diversity. Ecology 42: 594–598. \doi{10.2307/1932254}
+#'
+#' Valbuena R., Packalen P., Martín-Fernández S., Maltamo M. (2012) Diversity and equitability ordering profiles applied to the study of forest structure. Forest Ecology and Management 276: 185–195. \doi{10.1016/j.foreco.2012.03.036}
 #'
 #' @examples
 #' # Get the example laz file
@@ -374,11 +392,14 @@ FHD = function(lad_profile, evenness = FALSE, LAD.threshold = -1){
 #' the alternative TRUE was recommended by Valbuena et al. (2012), and it divides by the number of voxels with LAD values above the threshold, following Smith and Wilson (1996).
 #' @param LAD.threshold numerical (0,1), defines the minimum value of LAD for considering the relative leaf abundance of a voxel in GS calculation. Defaults to the inverse of the total number of voxels.
 #'
+#' @return A [`numeric`][base::numeric] containing the Fini-Simpson index calculated from the Leaf Area Density profile
 #'
 #' @references
-#' Hill M. O. (1973) Diversity and evenness: a unifying notation and its consequences. Ecology. 54: 427–432. https://doi.org/10.2307%2F1934352
-#' Smith B., and Wilson J.B. (1996). A consumer's guide to evenness indices. Oikos 76: 70–82. http://dx.doi.org/10.2307/3545749
-#' Valbuena R., Packalen P., Martín-Fernández S., Maltamo M. (2012) Diversity and equitability ordering profiles applied to the study of forest structure. Forest Ecology and Management 276: 185–195. http://dx.doi.org/10.1016/j.foreco.2012.03.036
+#' Hill M. O. (1973) Diversity and evenness: a unifying notation and its consequences. Ecology. 54: 427–432. \doi{10.2307/1934352}
+#'
+#' Smith B., and Wilson J.B. (1996). A consumer's guide to evenness indices. Oikos 76: 70–82. \doi{10.2307/3545749}
+#'
+#' Valbuena R., Packalen P., Martín-Fernández S., Maltamo M. (2012) Diversity and equitability ordering profiles applied to the study of forest structure. Forest Ecology and Management 276: 185–195. \doi{10.1016/j.foreco.2012.03.036}
 #'
 #' @examples
 #' # Get the example laz file
@@ -425,11 +446,13 @@ GS = function(lad_profile, evenness = FALSE, LAD.threshold = -1){
 #' @param normlas.file normalized las file
 #' @param threshold numerical, defines the minimum height considered to represent an echo from leaves.
 #'
+#' @return A [`numeric`][base::numeric] containing the Gini coefficient (GC) calculated from the normalized LAS file
+#'
 #' @note Valbuena et al. (2012) argues on why Gini is better suited to describe structural complexity the Foliage Height Diversity or the Gini-Simpon index.
 #'
 #' @references
-#' Valbuena R., Packalen P., Martín-Fernández S., Maltamo M. (2012) Diversity and equitability ordering profiles applied to the study of forest structure. Forest Ecology and Management 276: 185–195. http://dx.doi.org/10.1016/j.foreco.2012.03.036
-#' Valbuena R., Maltamo M., Mehtätalo L., Packalen P. (2017) Key structural features of Boreal forests may be detected directly using L-moments from airborne lidar data. Remote Sensing of Environment. 194: 437–446. https://doi.org/10.1016/j.rse.2016.10.024
+#' Valbuena R., Packalen P., Martín-Fernández S., Maltamo M. (2012) Diversity and equitability ordering profiles applied to the study of forest structure. Forest Ecology and Management 276: 185–195. \doi{10.1016/j.foreco.2012.03.036}
+#' Valbuena R., Maltamo M., Mehtätalo L., Packalen P. (2017) Key structural features of Boreal forests may be detected directly using L-moments from airborne lidar data. Remote Sensing of Environment. 194: 437–446. \doi{10.1016/j.rse.2016.10.024}
 #'
 #' @examples
 #' # Get the example laz file
@@ -464,7 +487,10 @@ GC = function(normlas.file, threshold = 1){
 #' @param min mix canopy height
 #' @param relative.value LAI map can be made in percentage of a relative lai value (indicate for effective LAI)
 #'
+#' A Leaf Area Index (LAI) [`RasterLayer`][raster::RasterLayer-class] produced from the LAD voxels output from [lad.voxels()] function.
+#'
 #' @examples
+#' library(raster)
 #' # Get the example laz file
 #' normlas.file = system.file("extdata", "lidar_example.laz", package="leafR")
 #'
@@ -476,10 +502,7 @@ GC = function(normlas.file, threshold = 1){
 #'
 #' #Map using absolute values
 #' lai_raster = lai.raster(VOXELS_LAD.5)
-#' \donttest{
-#' x11()
 #' plot(lai_raster)
-#' }
 #'
 #' #############################
 #' ## RELATIVE LAI Raster
@@ -497,11 +520,10 @@ GC = function(normlas.file, threshold = 1){
 #'
 #' #Map using relative values (%)
 #' relative.lai_raster = lai.raster(VOXELS_LAD.5, relative.value = lidar.lai)
-#' \donttest{
-#' x11()
 #' plot(relative.lai_raster)
-#' }
 #'
+#' @importFrom raster raster
+#' @importFrom sp gridded
 #' @export
 # The use of min and max arguments allowed the estimation of the LAI for different vertical strata
 lai.raster = function(VOXELS_LAD, min = 1, relative.value = NULL){
@@ -537,6 +559,8 @@ lai.raster = function(VOXELS_LAD, min = 1, relative.value = NULL){
 #'
 #' @param lidar.lai the output from lai() function
 #' @param real.lai numeric, known real LAI
+#'
+#' @return A [`numeric`][base::numeric] with the calculate value for k coefficient for calibrating the real LAI from calculated LAI.
 #'
 #' @examples
 #' normlas.file = system.file("extdata", "lidar_example.laz", package="leafR")
